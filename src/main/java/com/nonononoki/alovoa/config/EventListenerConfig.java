@@ -65,6 +65,12 @@ public class EventListenerConfig {
 	private UserIntentionRepository userIntentionRepo;
 
 	@Autowired
+	private com.nonononoki.alovoa.repo.SystemConfigurationRepository systemConfigurationRepo;
+
+	@Autowired
+	private com.nonononoki.alovoa.service.SystemConfigurationService systemConfigurationService;
+
+	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Value("${app.admin.email}")
@@ -81,6 +87,13 @@ public class EventListenerConfig {
 		setDefaultGenders();
 		setDefaultIntentions();
 		setDefaultUserMiscInfo();
+		setDefaultSystemConfiguration();
+	}
+
+	public void setDefaultSystemConfiguration() {
+		if (systemConfigurationRepo.count() == 0) {
+			systemConfigurationService.createDefault();
+		}
 	}
 
 	private void setDefaultUserMiscInfo() {
@@ -164,6 +177,11 @@ public class EventListenerConfig {
 			UserIntention sex = new UserIntention();
 			sex.setText("sex");
 			userIntentionRepo.saveAndFlush(sex);
+
+			// EyaLove: dedicated friendship intention
+			UserIntention friend = new UserIntention();
+			friend.setText("friend");
+			userIntentionRepo.saveAndFlush(friend);
 		}
 	}
 

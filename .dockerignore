@@ -1,0 +1,27 @@
+# Build artifacts
+target/
+build/
+
+# Version control
+.git
+.gitignore
+
+# IDE / editor
+.idea
+.vscode
+.settings
+.project
+.classpath
+*.iml
+
+# Logs and local data
+logs/
+*.log
+
+# Secrets and local env
+.env
+
+# Docs and CI not needed in the image
+*.md
+.github/
+scripts/

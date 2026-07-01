@@ -27,6 +27,8 @@ public class UserIntention {
 	public static final long DATE = 2;
 	@Transient
 	public static final long SEX = 3;
+	@Transient
+	public static final long FRIEND = 4;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)

@@ -1,6 +1,14 @@
-# <img src="https://raw.githubusercontent.com/Alovoa/alovoa/master/src/main/resources/static/img/android-chrome-192x192.png" width="70"> Alovoa
+# <img src="src/main/resources/static/img/android-chrome-192x192.png" width="70"> EyaLove
 
-Alovoa aims to be the first widespread free and open-source dating web platform.
+EyaLove is a modern dating platform for anonymous, local and intention-based connections
+(love, friendship, social meetups, casual). It is built on top of the open-source
+[Alovoa](https://github.com/Alovoa/alovoa) project.
+
+Key differences with EyaLove: **anonymity + proximity + clear intentions + an active community**,
+paid account activation via Mobile Money (Wave, MTN, Moov, Tmoney, Orange...) through Tchin,
+community announcements, and an extended admin panel.
+
+> This repository is a customized fork of Alovoa. Original project credits below.
 
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Falovoa.com%2F)](https://alovoa.com/)
 [![Testing Website](https://img.shields.io/website?url=https%3A%2F%2Fbeta.alovoa.com%2F&label=Testing%20website)](https://beta.alovoa.com/)
@@ -57,13 +65,36 @@ Like this project? Consider making a donation.
 - Enter credentials for database server, email server and encryption keys in `application.properties`
 - Execute `mvn install` in the root folder
 
-Or you can use [Docker](https://docs.docker.com/engine/install/) and [Docker compose](https://docs.docker.com/compose/).
-To bring up the server, after setting the required values in ` src/main/resources/application.properties` you can just run below commands:
-``` 
-docker-compose build
-docker-compose up -d
-docker-compose logs -f
+### Run with Docker (recommended)
+
+You can use [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/).
+All configuration is provided via environment variables, so you do **not** need to edit
+`application.properties`.
+
+1. Copy the example environment file and fill in your values (database passwords, encryption
+   keys, admin account, mail server and Tchin credentials):
+
+```bash
+cp .env.example .env
+# then edit .env
 ```
+
+2. Build and start the stack (server + MariaDB):
+
+```bash
+docker compose build
+docker compose up -d
+docker compose logs -f
+```
+
+The server starts on the port defined by `SERVER_PORT` (default `8081`), and the database
+service starts automatically with a health check before the app boots.
+
+Important variables (see `.env.example` for the full list):
+- `APP_TEXT_KEY` (16/24/32 chars) and `APP_TEXT_SALT` (16 chars) — required for database encryption
+- `APP_ADMIN_EMAIL` / `APP_ADMIN_KEY` — the default admin account
+- `ACCESS_PAYMENT_ENABLED`, `ACCESS_PRICE` (default 11000), `ACCESS_CURRENCY` (default XOF)
+- `TCHIN_API_KEY`, `TCHIN_SECRET`, `TCHIN_WEBHOOK_SECRET` — Mobile Money payment provider
 
 ### Debugging
 - Spring Tool Suite / IntelliJ is recommended for debugging

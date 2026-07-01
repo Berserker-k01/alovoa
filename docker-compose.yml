@@ -1,29 +1,89 @@
-version: '3'
 services:
   server:
-    container_name: alovoa-server
+    container_name: eyalove-server
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    image: alovoa
+    image: eyalove
     ports:
-      - "8081:8080"
-    stdin_open: true
-    tty: true
-    links:
-      - mariadb
+      - "${SERVER_PORT:-8081}:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      JAVA_OPTS: ${JAVA_OPTS:--Xmx512m -XX:+HeapDumpOnOutOfMemoryError}
+      SPRING_PROFILES_ACTIVE: prod
+
+      # Database (points at the mariadb service, not localhost)
+      SPRING_DATASOURCE_URL: "jdbc:mariadb://mariadb:3306/${DB_NAME:-eyalove}?createDatabaseIfNotExist=true&serverTimezone=UTC&useLegacyDatetimeCode=false"
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-eyalove}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-eyalove}
+
+      # Transparent database encryption (REQUIRED - app won't start without these)
+      APP_TEXT_KEY: ${APP_TEXT_KEY}
+      APP_TEXT_SALT: ${APP_TEXT_SALT}
+
+      # Default admin account created on first start
+      APP_ADMIN_EMAIL: ${APP_ADMIN_EMAIL}
+      APP_ADMIN_KEY: ${APP_ADMIN_KEY}
+
+      # Remember-me cookie signing key (change in production!)
+      APP_LOGIN_REMEMBER_KEY: ${APP_LOGIN_REMEMBER_KEY}
+
+      # Public URLs
+      APP_DOMAIN: ${APP_DOMAIN:-http://localhost:8081}
+      APP_URL_FRONT_END: ${APP_URL_FRONT_END:-http://localhost:8081}
+
+      # OAuth2 (dummy defaults so the app boots without real OAuth credentials;
+      # replace with real values to enable Google/Facebook login)
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-dummy}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-dummy}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_FACEBOOK_CLIENT_ID: ${OAUTH_FACEBOOK_CLIENT_ID:-dummy}
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_FACEBOOK_CLIENT_SECRET: ${OAUTH_FACEBOOK_CLIENT_SECRET:-dummy}
+
+      # Mail (SMTP)
+      SPRING_MAIL_HOST: ${MAIL_HOST}
+      SPRING_MAIL_PORT: ${MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_MAIL_TEST_CONNECTION: ${MAIL_TEST_CONNECTION:-false}
+
+      # EyaLove paid access (defaults seeded on first start, editable from admin panel)
+      APP_ACCESS_PAYMENT_ENABLED: ${ACCESS_PAYMENT_ENABLED:-false}
+      APP_ACCESS_PRICE: ${ACCESS_PRICE:-11000}
+      APP_ACCESS_CURRENCY: ${ACCESS_CURRENCY:-XOF}
+
+      # Tchin Mobile Money provider
+      APP_PAYMENT_TCHIN_BASE_URL: ${TCHIN_BASE_URL:-https://api.tchin.io}
+      APP_PAYMENT_TCHIN_API_KEY: ${TCHIN_API_KEY}
+      APP_PAYMENT_TCHIN_SECRET: ${TCHIN_SECRET}
+      APP_PAYMENT_TCHIN_WEBHOOK_SECRET: ${TCHIN_WEBHOOK_SECRET:-changeme}
+      APP_PAYMENT_TCHIN_RETURN_URL: ${TCHIN_RETURN_URL:-http://localhost:8081/payment/return}
+      APP_PAYMENT_TCHIN_CALLBACK_URL: ${TCHIN_CALLBACK_URL:-http://localhost:8081/payment/webhook/tchin}
+    volumes:
+      - app_logs:/home/app/logs
+
   mariadb:
+    container_name: eyalove-db
     restart: always
-    image: mariadb:10.7
+    image: mariadb:10.11
     expose:
       - 3306
     environment:
-      MARIADB_DATABASE: alovoaDB
-      MARIADB_USER: root
-      MARIADB_PASSWORD: example
-      MARIADB_ROOT_PASSWORD: example
+      MARIADB_DATABASE: ${DB_NAME:-eyalove}
+      MARIADB_USER: ${DB_USER:-eyalove}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-eyalove}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-eyalove_root}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     volumes:
-      - db_data:/var/lib/mariadb
+      - db_data:/var/lib/mysql
+
 volumes:
   db_data:
+  app_logs:

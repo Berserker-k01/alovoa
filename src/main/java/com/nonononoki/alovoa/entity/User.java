@@ -72,6 +72,12 @@ public class User implements UserDetails {
     private boolean confirmed;
     @JsonIgnore
     private boolean disabled;
+    // EyaLove: whether the user has paid the account-activation fee
+    @JsonIgnore
+    private boolean accessPaid;
+    // EyaLove: when paid access was granted
+    @JsonIgnore
+    private Date accessGrantedDate;
     @JsonIgnore
     private String country;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -119,6 +125,9 @@ public class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
     @JsonIgnore
     private List<UserDonation> donations;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+    @JsonIgnore
+    private List<UserPayment> payments;
     @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true, mappedBy = "userFrom")
     @JsonIgnore
     private List<Message> messageSent;

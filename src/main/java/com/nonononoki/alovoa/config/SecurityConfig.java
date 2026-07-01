@@ -111,6 +111,8 @@ public class SecurityConfig {
                         .requestMatchers("/captcha/**").permitAll()
                         .requestMatchers("/donate-list").permitAll()
                         .requestMatchers("/donate/received/**").permitAll()
+                        .requestMatchers("/payment/webhook/**").permitAll()
+                        .requestMatchers("/payment/return").permitAll()
                         .requestMatchers("/password/**").permitAll()
                         .requestMatchers("/favicon.ico").permitAll()
                         .requestMatchers("/sw.js").permitAll()

@@ -105,4 +105,37 @@ public class AdminController {
         return adminService.deleteInvalidUsers();
     }
 
+    @GetMapping("/system-configuration")
+    public com.nonononoki.alovoa.entity.SystemConfiguration getSystemConfiguration() throws AlovoaException {
+        return adminService.getSystemConfiguration();
+    }
+
+    @PostMapping("/system-configuration")
+    public com.nonononoki.alovoa.entity.SystemConfiguration updateSystemConfiguration(
+            @RequestParam boolean paymentEnabled,
+            @RequestParam double accessPrice,
+            @RequestParam String currency) throws AlovoaException {
+        return adminService.updateSystemConfiguration(paymentEnabled, accessPrice, currency);
+    }
+
+    @GetMapping("/payments")
+    public List<com.nonononoki.alovoa.entity.user.UserPayment> getPayments() throws AlovoaException {
+        return adminService.getPayments();
+    }
+
+    @GetMapping("/announcements")
+    public List<com.nonononoki.alovoa.entity.Announcement> getAnnouncements() throws AlovoaException {
+        return adminService.getAnnouncements();
+    }
+
+    @PostMapping("/announcement/{id}/active/{active}")
+    public void setAnnouncementActive(@PathVariable Long id, @PathVariable boolean active) throws AlovoaException {
+        adminService.setAnnouncementActive(id, active);
+    }
+
+    @DeleteMapping("/announcement/{id}")
+    public void deleteAnnouncement(@PathVariable Long id) throws AlovoaException {
+        adminService.deleteAnnouncement(id);
+    }
+
 }

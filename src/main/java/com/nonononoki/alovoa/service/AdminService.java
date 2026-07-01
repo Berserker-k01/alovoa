@@ -62,9 +62,54 @@ public class AdminService {
     private UserVerificationPictureRepository userVerificationPictureRepo;
     @Autowired
     private TextEncryptorConverter textEncryptor;
+    @Autowired
+    private SystemConfigurationService systemConfigurationService;
+    @Autowired
+    private UserPaymentRepository userPaymentRepo;
+    @Autowired
+    private AnnouncementRepository announcementRepo;
 
     @Value("${app.search.ignore-intention}")
     private boolean ignoreIntention;
+
+    public com.nonononoki.alovoa.entity.SystemConfiguration getSystemConfiguration() throws AlovoaException {
+        checkRights();
+        return systemConfigurationService.get();
+    }
+
+    public com.nonononoki.alovoa.entity.SystemConfiguration updateSystemConfiguration(boolean paymentEnabled,
+            double accessPrice, String currency) throws AlovoaException {
+        checkRights();
+        return systemConfigurationService.update(paymentEnabled, accessPrice, currency);
+    }
+
+    public List<com.nonononoki.alovoa.entity.user.UserPayment> getPayments() throws AlovoaException {
+        checkRights();
+        return userPaymentRepo.findAllByOrderByDateCreatedDesc();
+    }
+
+    public long countSuccessfulPayments() throws AlovoaException {
+        checkRights();
+        return userPaymentRepo.countByStatus(com.nonononoki.alovoa.entity.user.UserPayment.STATUS_SUCCESS);
+    }
+
+    public List<com.nonononoki.alovoa.entity.Announcement> getAnnouncements() throws AlovoaException {
+        checkRights();
+        return announcementRepo.findAllByOrderByDateCreatedDesc();
+    }
+
+    public void setAnnouncementActive(Long id, boolean active) throws AlovoaException {
+        checkRights();
+        com.nonononoki.alovoa.entity.Announcement a = announcementRepo.findById(id)
+                .orElseThrow(() -> new AlovoaException("announcement_not_found"));
+        a.setActive(active);
+        announcementRepo.saveAndFlush(a);
+    }
+
+    public void deleteAnnouncement(Long id) throws AlovoaException {
+        checkRights();
+        announcementRepo.deleteById(id);
+    }
 
     public void sendMailSingle(MailDto dto) throws AlovoaException {
         checkRights();
